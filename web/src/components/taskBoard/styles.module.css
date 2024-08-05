@@ -1,0 +1,34 @@
+.container {
+    background-color: rgb(232, 238, 239);
+    padding: 10px;
+    min-height: 100vh;
+
+    display: flex;
+    /* flex-direction: ; */
+}
+
+.subContainer {
+    width: 40vw;
+}
+
+.subContainer ul {
+    list-style-type: none;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.subContainerHeading {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    margin: 5px;
+}
+
+.count {
+    background-color: lightgray;
+    color: gray;
+    border-radius: 50%;
+    padding: 2px;
+    margin: 2px;
+}

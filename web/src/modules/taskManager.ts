@@ -1,58 +1,71 @@
+
 import Task from "@/model/Task";
 import { initialTasks } from "@/utils/TaskList";
 
 let tasks: Task[] = [...initialTasks];
+let activeGroupId: number = 1;
+let taskIndex: Map<string, number> = new Map();
+let lastIndex:number = 10;
+
 
 export function initializeTasks() {
-    if (tasks.length === 0) {
-        tasks.push(new Task(1, "Initial Task", "This is the initial task", "Employee 1", 1, false));
-    }
+    tasks = [...initialTasks];
+    tasks.forEach((task, idx) => taskIndex.set(task.title, idx))
 }
 
 export function getActiveTasks(): Task[] {
-
-    const firstIncompleteGroup = Math.min(
-        ...tasks.filter(task => !task.completed).map(task => task.group)
-    );
-    return tasks.filter(task => !task.completed && task.group === firstIncompleteGroup);
+    return tasks.filter(task => task.group <= activeGroupId && task.completed == false);
+ 
 }
 
 export function getCompletedTasks(): Task[] {
-    return tasks.filter(task => task.completed);
+
+    return tasks.filter(task => task.completed==true)
+
 }
 
 export function getAllTasks(): Task[] {
+
     return tasks;
+ 
 }
 
 export function completeTask(taskTitle: string): void {
-    const task = tasks.find(task => task.title === taskTitle);
-    if (task) {
-        task.completed = true;
-
-        const nextTaskInGroup = tasks.find(t => t.group === task.group && !t.completed);
-        if (!nextTaskInGroup) {
-
-            const nextGroupTasks = tasks.filter(t => t.group === task.group + 1 && !t.completed);
-            if (nextGroupTasks.length > 0) {
-                nextGroupTasks[0].completed = false;
-            }
-        }
-    }
+        const taskId = taskIndex.get(taskTitle);
+        
+        if(taskId!==undefined && taskId>=0)
+            tasks[taskId].completed=true;
+        
+        if(tasks.filter(task => task.group<=activeGroupId && task.completed === false).length == 0)
+            activeGroupId++;
+  
 }
 
 export function createTask(title: string, description: string, persona: string, group: number): void {
-    const newTask = new Task(tasks.length + 1, title, description, persona, group);
+
+    let newTask: Task = new Task(lastIndex+1, title, description, persona, group);
+    
     tasks.push(newTask);
+    taskIndex.set(title, lastIndex);
+    lastIndex++;
+  
 }
 
 export function updateTask(taskId: number, updatedTask: Partial<Omit<Task, 'id'>>): void {
-    const taskIndex = tasks.findIndex(task => task.id === taskId);
-    if (taskIndex !== -1) {
-        tasks[taskIndex] = { ...tasks[taskIndex], ...updatedTask };
-    }
+    const idx = tasks.findIndex(task => task.id === taskId);
+    if(idx === -1)
+            return;
+    tasks[idx] = {
+        ...tasks[idx],
+        ...updatedTask
+    };
+ 
 }
 
 export function deleteTask(taskId: number): void {
-    tasks = tasks.filter(task => task.id !== taskId);
+    const idx = tasks.findIndex(task => task.id === taskId);;
+    if(idx !== -1 && tasks[idx] !== undefined){
+        taskIndex.delete(tasks[idx].title);
+        tasks = tasks.filter(task => task.id !== taskId);
+    }
 }
